@@ -1,7 +1,11 @@
+import dotenv from "dotenv";
+
 import { snapshotEpoch } from "./v2/governance/allocation";
 
 const EPOCH_START = 1746662400;
 const EPOCH_DURATION = 604800;
+
+dotenv.config();
 
 const panic = <T>(message: string): T => {
   throw new Error(message);

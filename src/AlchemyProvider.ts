@@ -96,7 +96,7 @@ export class AlchemyProvider extends UrlJsonRpcProvider {
     return {
       allowGzip: true,
       url: "https:/" + "/" + host + apiKey,
-      throttleCallback: (attempt: number, url: string) => {
+      throttleCallback: () => {
         if (apiKey === defaultApiKey) {
           showThrottleMessage();
         }

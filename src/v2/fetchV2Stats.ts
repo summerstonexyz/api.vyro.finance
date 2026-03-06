@@ -1,6 +1,5 @@
 import type { BlockTag, Provider } from "@ethersproject/abstract-provider";
 import type { BigNumber } from "@ethersproject/bignumber";
-import { AddressZero } from "@ethersproject/constants";
 import { resolveProperties } from "@ethersproject/properties";
 import { Decimal } from "@liquity/lib-base";
 
@@ -40,20 +39,6 @@ const fetchBranchData = async (
         ]).then(([a, b]) => a.add(b))
       })
     )
-  );
-
-const emptyBranchData = (branches: LiquityV2BranchContracts[]): ReturnType<typeof fetchBranchData> =>
-  Promise.resolve(
-    branches.map(branch => ({
-      coll_symbol: branch.collSymbol,
-      coll_active: Decimal.ZERO,
-      coll_default: Decimal.ZERO,
-      coll_price: Decimal.ZERO,
-      sp_deposits: Decimal.ZERO,
-      interest_accrual_1y: Decimal.ZERO,
-      interest_pending: Decimal.ZERO,
-      batch_management_fees_pending: Decimal.ZERO
-    }))
   );
 
 const isDuneSpAverageApyResponse = (
@@ -98,23 +83,13 @@ const fetchSpAverageApysFromDune = async ({
   });
 
   return Object.fromEntries(
-    branches.map(branch => {
+    branches.flatMap(branch => {
       const apys = sevenDaysApys.filter(row => row.collateral_type === branch.collSymbol);
-      return [
-        branch.collSymbol,
-        {
-          apy_avg_1d: apys[0].apr,
-          apy_avg_7d: apys.reduce((acc, { apr }) => acc + apr, 0) / apys.length
-        }
-      ];
+      return apys.length > 0
+        ? [[branch.collSymbol, apys.reduce((acc, { apr }) => acc + apr, 0) / apys.length]]
+        : [];
     })
-  ) as Record<
-    string,
-    {
-      apy_avg_1d: number;
-      apy_avg_7d: number;
-    }
-  >;
+  ) as Record<string, number>;
 };
 
 const isDuneSpUpfrontFeeResponse = (
@@ -164,22 +139,9 @@ export const fetchV2Stats = async ({
   const SP_YIELD_SPLIT = Number(Decimal.fromBigNumberString(deployment.constants.SP_YIELD_SPLIT));
   const contracts = getContracts(provider, deployment);
 
-  // Last step of deployment renounces Governance ownership
-  const deployed = await contracts.governance
-    .owner()
-    .then(owner => owner == AddressZero)
-    .catch(() => false);
-
-  console.log("deployed", deployed);
-
   const [total_bold_supply, branches, spV2AverageApys, spUpfrontFee24h] = await Promise.all([
-    // total_bold_supply
-    // deployed ? contracts.boldToken.totalSupply({ blockTag }).then(decimalify) : Decimal.ZERO,
     contracts.boldToken.totalSupply({ blockTag }).then(decimalify),
-
-    // branches
-    // (deployed ? fetchBranchData : emptyBranchData)(contracts.branches)
-    fetchBranchData(contracts.branches)
+    fetchBranchData(contracts.branches, blockTag)
       .then(branches => {
         return branches.map(branch => {
           const sp_deposits = Number(branch.sp_deposits);
@@ -200,28 +162,11 @@ export const fetchV2Stats = async ({
           value_locked: branch.coll_value.add(branch.sp_deposits) // taking BOLD at face value
         }));
       }),
-
-    // spV2AverageApys
-    // deployed
-    //   ? fetchSpAverageApysFromDune({
-    //       branches: contracts.branches,
-    //       apiKey: duneApiKey,
-    //       url: duneSpApyUrl
-    //     })
-    //   : null,
     fetchSpAverageApysFromDune({
       branches: contracts.branches,
       apiKey: duneApiKey,
       url: duneSpApyUrl
     }),
-
-    // spUpfrontFee24h
-    // deployed
-    //   ? fetchSpUpfrontFeeFromDune({
-    //       apiKey: duneApiKey,
-    //       url: duneSpUpfrontFeeUrl
-    //     })
-    //   : null
     fetchSpUpfrontFeeFromDune({
       apiKey: duneApiKey,
       url: duneSpUpfrontFeeUrl
@@ -245,7 +190,7 @@ export const fetchV2Stats = async ({
             ? sp_apy + (365 * (spUpfrontFee24h[coll_symbol] ?? 0)) / Number(branch.sp_deposits)
             : undefined;
 
-        const sp_apy_avg_7d = spV2AverageApys?.[coll_symbol].apy_avg_7d;
+        const sp_apy_avg_7d = spV2AverageApys?.[coll_symbol];
 
         return [
           coll_symbol,

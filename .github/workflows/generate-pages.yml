@@ -5,23 +5,17 @@ env:
   FORCE_COLOR: true
 
 on:
-  # push:
-  #   branches: [main]
-  # pull_request:
-  #   branches: [main]
   schedule:
     - cron: "0 0 * * *"
 
 jobs:
-  lqty-supply:
+  generate-api-files:
     name: Generate API files
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        with:
-          submodules: true
 
       - name: Setup Node.js & Yarn
         uses: actions/setup-node@v4
@@ -40,8 +34,6 @@ jobs:
         env:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
-          # TRANSPOSE_API_KEY: ${{ secrets.TRANSPOSE_API_KEY }}
-          # COINGECKO_DEMO_KEY: ${{ secrets.COINGECKO_DEMO_KEY }}
 
       - name: Commit generated files
         uses: EndBug/add-and-commit@v9
