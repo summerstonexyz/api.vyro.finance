@@ -65,12 +65,14 @@ const fetchSpAverageApysFromDune = async ({
   url
 }: {
   branches: LiquityV2BranchContracts[];
-  apiKey: string;
+  apiKey?: string;
   url: string | null;
 }) => {
-  // disabled when DUNE_SPV2_AVERAGE_APY_URL_* is null
   if (!url) {
     return null;
+  }
+  if (!apiKey) {
+    throw new Error("missing DUNE_API_KEY");
   }
 
   const {
@@ -113,10 +115,13 @@ const fetchSpUpfrontFeeFromDune = async ({
   apiKey,
   url
 }: {
-  apiKey: string;
+  apiKey?: string;
   url: string | null;
 }) => {
   if (!url) return null;
+  if (!apiKey) {
+    throw new Error("missing DUNE_API_KEY");
+  }
   const { result } = await duneFetch({ apiKey, url, validate: isDuneSpUpfrontFeeResponse });
   return Object.fromEntries(result.rows.map(row => [row.collateral_type, row.upfront_fees]));
 };
@@ -132,7 +137,7 @@ export const fetchV2Stats = async ({
   provider: Provider;
   duneSpApyUrl: string | null;
   duneSpUpfrontFeeUrl: string | null;
-  duneApiKey: string;
+  duneApiKey?: string;
   deployment: LiquityV2Deployment;
   blockTag?: BlockTag;
 }) => {

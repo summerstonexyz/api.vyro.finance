@@ -32,8 +32,10 @@ jobs:
       - name: Fetch API data
         run: yarn once
         env:
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          UNICHAIN_RPC_URL: ${{ secrets.UNICHAIN_RPC_URL }}
           DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
+          DUNE_SPV2_AVERAGE_APY_URL: ${{ vars.DUNE_SPV2_AVERAGE_APY_URL }}
+          DUNE_SPV2_UPFRONT_FEE_URL: ${{ vars.DUNE_SPV2_UPFRONT_FEE_URL }}
 
       - name: Commit generated files
         uses: EndBug/add-and-commit@v9
