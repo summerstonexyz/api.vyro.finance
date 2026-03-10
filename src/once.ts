@@ -4,6 +4,7 @@ import util from "util";
 
 import { getProvider } from "./connection";
 import { OUTPUT_DIR_V2 } from "./constants";
+import { fetchPrices } from "./fetchPrices";
 import type { LiquityV2Deployment } from "./v2/contracts";
 import { fetchV2Stats } from "./v2/fetchV2Stats";
 
@@ -23,6 +24,7 @@ const unichainRpcUrl: string = process.env.UNICHAIN_RPC_URL || panic("missing UN
 const duneApiKey = process.env.DUNE_API_KEY || undefined;
 const duneSpApyUrl = process.env.DUNE_SPV2_AVERAGE_APY_URL || null;
 const duneSpUpfrontFeeUrl = process.env.DUNE_SPV2_UPFRONT_FEE_URL || null;
+const vyUsdPrice = process.env.VYUSD_PRICE || undefined;
 
 const unichainProvider = getProvider(unichainRpcUrl);
 
@@ -52,22 +54,32 @@ const writeTree = (parentDir: string, tree: Tree) => {
 
 async function main() {
   const deployment = readDeployment(V2_DEPLOYMENT_FILE);
-  const v2Stats = await fetchV2Stats({
-    deployment,
-    provider: unichainProvider,
-    duneSpApyUrl,
-    duneSpUpfrontFeeUrl,
-    duneApiKey
-  });
+  const [v2Stats, prices] = await Promise.all([
+    fetchV2Stats({
+      deployment,
+      provider: unichainProvider,
+      duneSpApyUrl,
+      duneSpUpfrontFeeUrl,
+      duneApiKey
+    }),
+    fetchPrices({
+      manualPrices: vyUsdPrice ? { vyUSD: vyUsdPrice } : undefined
+    })
+  ]);
 
-  writeTree(OUTPUT_DIR_V2, v2Stats);
+  const output = {
+    ...v2Stats,
+    prices
+  };
+
+  writeTree(OUTPUT_DIR_V2, output);
   fs.writeFileSync(
     path.join(OUTPUT_DIR_V2, V2_OUTPUT_FILE),
-    JSON.stringify(v2Stats, null, 2)
+    JSON.stringify(output, null, 2)
   );
 
   console.log();
-  console.log("v2 stats:", util.inspect(v2Stats, { colors: true, depth: null }));
+  console.log("v2 stats:", util.inspect(output, { colors: true, depth: null }));
 }
 
 main()
