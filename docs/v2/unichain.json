@@ -1,0 +1,55 @@
+{
+  "total_bold_supply": "600.579469331859065128",
+  "total_debt_pending": "0.019741569191644868",
+  "total_coll_value": "4481.747454385304789875",
+  "total_sp_deposits": "201",
+  "total_value_locked": "4682.747454385304789875",
+  "max_sp_apy": "0.11204964294880392",
+  "branch": {
+    "WETH": {
+      "coll_active": "0.5",
+      "coll_default": "0",
+      "coll_price": "2028.65",
+      "sp_deposits": "67",
+      "interest_accrual_1y": "10.009768103426481933",
+      "interest_pending": "0.006587796073903369",
+      "batch_management_fees_pending": "0",
+      "debt_pending": "0.006587796073903369",
+      "coll_value": "1014.325",
+      "value_locked": "1081.325",
+      "sp_apy": "0.11204964294880392",
+      "apy_avg": "0.11204964294880392",
+      "sp_apy_avg_1d": "0.11204964294880392"
+    },
+    "wstETH": {
+      "coll_active": "1",
+      "coll_default": "0",
+      "coll_price": "2493.06725233909931305",
+      "sp_deposits": "67",
+      "interest_accrual_1y": "10.00958904109589041",
+      "interest_pending": "0.006580377980720447",
+      "batch_management_fees_pending": "0",
+      "debt_pending": "0.006580377980720447",
+      "coll_value": "2493.06725233909931305",
+      "value_locked": "2560.06725233909931305",
+      "sp_apy": "0.11204763851973013",
+      "apy_avg": "0.11204763851973013",
+      "sp_apy_avg_1d": "0.8956297280719691"
+    },
+    "UNI": {
+      "coll_active": "253.097680362781053382",
+      "coll_default": "0",
+      "coll_price": "3.84972",
+      "sp_deposits": "67",
+      "interest_accrual_1y": "10.00958904109589041",
+      "interest_pending": "0.006573395137021052",
+      "batch_management_fees_pending": "0",
+      "debt_pending": "0.006573395137021052",
+      "coll_value": "974.355202046205476825",
+      "value_locked": "1041.355202046205476825",
+      "sp_apy": "0.11204763851973013",
+      "apy_avg": "0.11204763851973013",
+      "sp_apy_avg_1d": "0.8956297280719691"
+    }
+  }
+}
